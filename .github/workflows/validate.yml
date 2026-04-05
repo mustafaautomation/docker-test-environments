@@ -1,0 +1,17 @@
+name: Validate
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+permissions: { contents: read }
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Docker Compose files
+        run: |
+          for f in environments/*/docker-compose.yml; do
+            echo "Validating $f..."
+            docker compose -f "$f" config --quiet && echo "OK: $f" || (echo "INVALID: $f" && exit 1)
+          done
+          echo "All environments valid."
