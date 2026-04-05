@@ -1,0 +1,42 @@
+# Full-stack test environment: PostgreSQL + Redis + API + Mailhog
+# Usage: docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    environment:
+      MH_STORAGE: memory
+
+  wiremock:
+    image: wiremock/wiremock:3.10.0
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./wiremock:/home/wiremock
+    command: --verbose
