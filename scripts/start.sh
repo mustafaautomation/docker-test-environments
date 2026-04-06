@@ -1,13 +1,20 @@
 #!/bin/bash
 # Start a test environment
-# Usage: ./scripts/start.sh [postgres|full-stack|redis-queue|mongo-api]
+# Usage: ./scripts/start.sh [env-name]
+# Available: postgres, full-stack, redis-queue, mongo-api, elasticsearch, rabbitmq
 
 ENV=${1:-postgres}
 DIR="environments/$ENV"
 
 if [ ! -d "$DIR" ]; then
   echo "Unknown environment: $ENV"
-  echo "Available: postgres, full-stack, redis-queue, mongo-api"
+  echo ""
+  echo "Available environments:"
+  for d in environments/*/; do
+    name=$(basename "$d")
+    services=$(grep -c "image:" "$d/docker-compose.yml" 2>/dev/null || echo 0)
+    echo "  - $name ($services services)"
+  done
   exit 1
 fi
 
